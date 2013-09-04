@@ -59,20 +59,22 @@ module ActiveRecord
           configuration = { mode: :balanced }
           configuration.update(options) if options.is_a?(Hash)
 
-          # TODO: 
-
-
-          
+          # TODO: Implement balanced mode
+          # Workarround while we don't have balanced mode yet.
+          add_node_into(node, configuration[:mode])
         end
 
         def add_node_into(node, options={})
+          direction = options[:direction]
           eval <<-EOV
             if self.#{var}.nil?
-              self.#{var} = new_user
-              new_user.parent_id = self.id
-              new_user.save
+              self.#{var} = node
+              node.parent_id = self.id
+              
+              node.save
+              self.save
             else
-              self.#{var}.add_to_tree(new_user, direction)
+              self.#{var}.add_node(node, direction)
             end
           EOV
         end
