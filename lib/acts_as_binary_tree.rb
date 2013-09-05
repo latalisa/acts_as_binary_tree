@@ -29,6 +29,8 @@ module ActsAsBinaryTree
       belongs_to :parent, class_name: name, foreign_key: configuration[:parent_key]
       belongs_to :reference, class_name: name, foreign_key: configuration[:reference_key]
 
+      has_many :references, class_name: name, foreign_key: configuration[:reference_key]
+
       class_eval <<-EOV
         include ActsAsBinaryTree::InstanceMethods
 
