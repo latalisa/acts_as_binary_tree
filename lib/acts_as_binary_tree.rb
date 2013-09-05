@@ -22,14 +22,24 @@ module ActsAsBinaryTree
       belongs_to :left, class_name: name, foreign_key: configuration[:left_key]
       belongs_to :right, class_name: name, foreign_key: configuration[:right_key]
       belongs_to :parent, class_name: name, foreign_key: configuration[:parent_key]
+
+      class_eval <<-EOV
+        include ActsAsBinaryTree::InstanceMethods
+      EOV
     end
   end
 
   module InstanceMethods
     # Returns a list of ancestors, starting from parent until root
-    def ancestors
+    def ancestors(options={})
+      configuration = {}
+      configuration.update(options) if options.is_a? Hash
+
       node, nodes = self, []
-      nodes << node = node.parent while node.parent
+      
+      nodes.concat([node.left].concat(node.left.get_nodes)) if node.left && configuration[:side] != :right
+      nodes.concat([node.right].concat(node.right.get_nodes)) if node.right && configuration[:side] != :left
+
       nodes
     end
 
@@ -42,24 +52,23 @@ module ActsAsBinaryTree
 
     # Returns all left childrens
     def get_left
-      get_childrens(:left)
+      get_nodes(side: :left)
     end
 
     # Returns all right childrens
     def get_right
-      get_childrens(:right)
+      get_nodes(side: :right)
     end
 
-    # Returns all childrens or children for a specific side (leg)
-    def get_childrens(options={})
-      configuration = {}
-      configuration.update(options) if options.is_a?(Hash)
+    def get_nodes(options={})
+      
+    end
 
-      node, left, right = self, [], []
-      left << node = node.left while node.left unless options[:side] == 'right'
-      right << node = node.right while node.right unless options[:side] == 'left'
-
-      {left: left, right: right}
+    # FIXME: Under development
+    def get_direct_nodes
+      node, nodes = self, []
+      nodes << node.left
+      nodes << node.right
     end
 
     def add_node(node, options={})
@@ -75,14 +84,14 @@ module ActsAsBinaryTree
     def add_node_into(node, options={})
       direction = options[:direction].to_s
       eval <<-EOV
-        if self.#{var}.nil?
-          self.#{var} = node
+        if self.#{direction}.nil?
+          self.#{direction} = node
           node.parent_id = self.id
 
           node.save
           self.save
         else
-          self.#{var}.add_node(node, direction)
+          self.#{direction}.add_node(node, direction)
         end
       EOV
     end
