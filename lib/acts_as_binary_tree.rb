@@ -34,7 +34,7 @@ module ActsAsBinaryTree
       class_eval <<-EOV
         include ActsAsBinaryTree::InstanceMethods
 
-        after_save :set_place_in_tree
+        after_create :set_place_in_tree
       EOV
     end
   end
