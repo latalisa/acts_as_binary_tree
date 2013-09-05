@@ -16,15 +16,23 @@ module ActsAsBinaryTree
   # providing a parent association and a children association.
   module ClassMethods
     def acts_as_binary_tree(options = {})
-      configuration = { left_key: 'left_id', right_key: 'right_id', parent_key: 'parent_id' }
+      configuration = { 
+        left_key: 'left_id', 
+        right_key: 'right_id', 
+        parent_key: 'parent_id',
+        reference_key: 'reference_id'
+      }
       configuration.update(options) if options.is_a?(Hash)
 
       belongs_to :left, class_name: name, foreign_key: configuration[:left_key]
       belongs_to :right, class_name: name, foreign_key: configuration[:right_key]
       belongs_to :parent, class_name: name, foreign_key: configuration[:parent_key]
+      belongs_to :reference, class_name: name, foreign_key: configuration[:reference_key]
 
       class_eval <<-EOV
         include ActsAsBinaryTree::InstanceMethods
+
+        after_save :set_place_in_tree
       EOV
     end
   end
@@ -32,13 +40,20 @@ module ActsAsBinaryTree
   module InstanceMethods
     # Returns a list of ancestors, starting from parent until root
     def ancestors(options={})
+      node, nodes = self, []
+      nodes << node = node.parent while node.parent
+      nodes
+    end
+
+    # Returns a list of nodes, starting node as root until last node
+    def nodes(options={})
       configuration = {}
       configuration.update(options) if options.is_a? Hash
 
       node, nodes = self, []
       
-      nodes.concat([node.left].concat(node.left.get_nodes)) if node.left && configuration[:side] != :right
-      nodes.concat([node.right].concat(node.right.get_nodes)) if node.right && configuration[:side] != :left
+      nodes.concat([node.left].concat(node.left.nodes)) if node.left && configuration[:side] != :right
+      nodes.concat([node.right].concat(node.right.nodes)) if node.right && configuration[:side] != :left
 
       nodes
     end
@@ -52,23 +67,12 @@ module ActsAsBinaryTree
 
     # Returns all left childrens
     def get_left
-      get_nodes(side: :left)
+      nodes(side: :left)
     end
 
     # Returns all right childrens
     def get_right
-      get_nodes(side: :right)
-    end
-
-    def get_nodes(options={})
-      
-    end
-
-    # FIXME: Under development
-    def get_direct_nodes
-      node, nodes = self, []
-      nodes << node.left
-      nodes << node.right
+      nodes(side: :right)
     end
 
     def add_node(node, options={})
@@ -76,8 +80,9 @@ module ActsAsBinaryTree
       configuration.update(options) if options.is_a?(Hash)
 
       # TODO: Implement balanced mode
-      # Workarround while we don't have balanced mode yet.
-      configuration[:mode] = :left if configuration[:mode].nil? || configuration[:mode] == :balanced
+      # START Workaround while we don't have balanced mode yet.
+      configuration[:mode] = :right if configuration[:mode].nil? || configuration[:mode] == :balanced
+      # END Workaround
       add_node_into(node, direction: configuration[:mode])
     end
 
@@ -88,12 +93,17 @@ module ActsAsBinaryTree
           self.#{direction} = node
           node.parent_id = self.id
 
-          node.save
           self.save
+          node.save
         else
           self.#{direction}.add_node(node, direction)
         end
       EOV
+    end
+
+    private
+    def set_place_in_tree
+      reference.add_node(self) unless parent
     end
 
   end
