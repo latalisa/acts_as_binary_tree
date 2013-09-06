@@ -29,7 +29,7 @@ module ActsAsBinaryTree
       belongs_to :parent, class_name: name, foreign_key: configuration[:parent_key]
       belongs_to :reference, class_name: name, foreign_key: configuration[:reference_key]
 
-      has_many :references, class_name: name, foreign_key: configuration[:reference_key]
+      has_many :referees, class_name: name, foreign_key: configuration[:reference_key]
 
       class_eval <<-EOV
         include ActsAsBinaryTree::InstanceMethods
@@ -54,8 +54,8 @@ module ActsAsBinaryTree
 
       node, nodes = self, []
       
-      nodes.concat([node.left].concat(node.left.nodes)) if node.left && configuration[:side] != :right
-      nodes.concat([node.right].concat(node.right.nodes)) if node.right && configuration[:side] != :left
+      nodes + ([node.left] + node.left.nodes) if node.left && configuration[:side] != :right
+      nodes + ([node.right] + node.right.nodes) if node.right && configuration[:side] != :left
 
       nodes
     end
@@ -94,6 +94,7 @@ module ActsAsBinaryTree
         if self.#{direction}.nil?
           self.#{direction} = node
           node.parent_id = self.id
+          node.side = direction
 
           self.save
           node.save

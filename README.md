@@ -4,3 +4,4 @@
 * right_id integer
 * parent_id integer
 * reference_id integer
+* side string
