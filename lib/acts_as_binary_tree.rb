@@ -107,7 +107,7 @@ module ActsAsBinaryTree
     private
     def set_place_in_tree
       return if reference_id.nil? && parent_id.nil?
-      reference.add_node(self, direction: read_attribute(:distribution_setup).to_sym) unless parent
+      reference.add_node(self, mode: read_attribute(:distribution_setup).to_sym) unless parent
     end
 
   end
