@@ -1,3 +1,4 @@
+# -*- encoding: utf-8 -*-
 module ActsAsBinaryTree
 
   class Railtie < Rails::Railtie
