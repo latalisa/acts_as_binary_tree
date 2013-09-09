@@ -5,7 +5,7 @@ require 'acts_as_binary_tree/version'
 Gem::Specification.new do |s|
   s.name        = 'acts_as_binary_tree'
   s.version     = ActsAsBinaryTree::VERSION
-  s.authors     = ['João Gabriel Fraga']
+  s.authors     = ['Joao Gabriel Fraga']
   s.email       = ['jgfraga@gmail.com']
   s.homepage    = 'https://github.com/joaofraga/acts_as_binary_tree'
   s.summary     = %q{Provides a binary tree behaviour to active_record models.}
