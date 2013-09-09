@@ -79,18 +79,30 @@ module ActsAsBinaryTree
     end
 
     def add_node(node, options={})
-      configuration = { mode: :balanced }
+      configuration = {}
       configuration.update(options) if options.is_a?(Hash)
 
-      # TODO: Implement balanced mode
-      # START Workaround while we don't have balanced mode yet.
-      configuration[:mode] = :right if configuration[:mode].nil? || configuration[:mode] == :balanced
-      # END Workaround
-      add_node_into(node, direction: configuration[:mode])
+      direction = get_direction(node, configuration[:mode])
+
+      add_node_into(node, direction: direction)
+    end
+
+    def get_direction(node, direction)
+      directions = [:left, :right]
+      return direction if directions.include?(direction.to_sym)
+
+      begin
+        last_side = node.reference.referees.last(2)[0].side.to_sym
+        directions.delete last_side
+        return directions[0]
+      rescue
+        return :left
+      end
     end
 
     def add_node_into(node, options={})
       direction = options[:direction].to_s
+
       eval <<-EOV
         if self.#{direction}.nil?
           self.#{direction} = node
@@ -100,7 +112,7 @@ module ActsAsBinaryTree
           self.save
           node.save
         else
-          self.#{direction}.add_node(node, direction)
+          self.#{direction}.add_node(node, mode: direction.to_sym)
         end
       EOV
     end
