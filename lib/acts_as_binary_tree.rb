@@ -120,7 +120,8 @@ module ActsAsBinaryTree
     private
     def set_place_in_tree
       return if reference_id.nil? && parent_id.nil?
-      reference.add_node(self, mode: reference.distribution_setup.to_sym) unless parent
+      node, mode = self, (self.side || reference.distribution_setup).to_sym
+      reference.add_node(node, mode: mode) unless parent
     end
 
   end
