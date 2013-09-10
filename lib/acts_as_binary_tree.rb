@@ -55,8 +55,8 @@ module ActsAsBinaryTree
 
       node, nodes = self, []
       
-      nodes + ([node.left] + node.left.nodes) if node.left && configuration[:side] != :right
-      nodes + ([node.right] + node.right.nodes) if node.right && configuration[:side] != :left
+      nodes += ([node.left] + node.left.nodes) if node.left && configuration[:side] != :right
+      nodes += ([node.right] + node.right.nodes) if node.right && configuration[:side] != :left
 
       nodes
     end
