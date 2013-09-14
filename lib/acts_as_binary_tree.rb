@@ -82,7 +82,8 @@ module ActsAsBinaryTree
       configuration = {}
       configuration.update(options) if options.is_a?(Hash)
 
-      direction = get_direction(node, configuration[:mode])
+      direction = get_direction(node, configuration[:mode].to_sym)
+      puts direction
 
       add_node_into(node, direction: direction)
     end
@@ -105,12 +106,9 @@ module ActsAsBinaryTree
 
       eval <<-EOV
         if self.#{direction}.nil?
-          self.#{direction} = node
-          node.parent_id = self.id
-          node.side = direction
-
-          self.save
-          node.save
+          self.update_attribute(:#{direction}, node)
+          node.update_attribute(:parent_id, self.id)
+          node.update_attribute(:side, direction)
         else
           self.#{direction}.add_node(node, mode: direction.to_sym)
         end
