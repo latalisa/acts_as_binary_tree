@@ -83,7 +83,7 @@ module ActsAsBinaryTree
       configuration.update(options) if options.is_a?(Hash)
 
       direction = get_direction(node, configuration[:mode].to_sym)
-      puts direction
+      # puts direction
 
       add_node_into(node, direction: direction)
     end
