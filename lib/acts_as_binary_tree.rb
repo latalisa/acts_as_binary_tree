@@ -82,17 +82,19 @@ module ActsAsBinaryTree
       configuration = {}
       configuration.update(options) if options.is_a?(Hash)
 
-      direction = get_direction(node, configuration[:mode].to_sym)
+      direction = get_direction(configuration[:mode].to_sym)
       # puts direction
 
       add_node_into(node, direction: direction)
     end
 
-    def get_direction(node, direction)
+    def get_direction(direction)
+      puts "#{direction}, #{direction.to_sym == :shortest_leg}"
       directions = [:left, :right]
       return direction if directions.include?(direction.to_sym)
-      if direction.to_sym == :sortest_leg
-        self.left_count <= self.right_count ? :left : :right
+      if direction.to_sym == :shortest_leg
+        puts "Shortest leg"
+        return self.left_count <= self.right_count ? :left : :right
       end
       return :left #if none of the above works, left is the default option.
     end
