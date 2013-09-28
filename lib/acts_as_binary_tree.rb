@@ -91,14 +91,10 @@ module ActsAsBinaryTree
     def get_direction(node, direction)
       directions = [:left, :right]
       return direction if directions.include?(direction.to_sym)
-
-      begin
-        last_side = node.reference.referees.last(2)[0].side.to_sym
-        directions.delete last_side
-        return directions[0]
-      rescue
-        return :left
+      if direction.to_sym == :sortest_leg
+        self.left_count <= self.right_count ? :left : :right
       end
+      return :left #if none of the above works, left is the default option.
     end
 
     def add_node_into(node, options={})
